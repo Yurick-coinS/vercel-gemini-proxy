@@ -1,6 +1,16 @@
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -13,7 +23,23 @@ module.exports = async (req, res) => {
     if (typeof req.body === "string") {
       req.body = JSON.parse(req.body);
     }
-    prompt = req.body.prompt;
+    // Универсально: поддержка и prompt, и contents.parts[0].text
+    if (req.body.prompt) {
+      prompt = req.body.prompt;
+    } else if (
+      req.body.contents &&
+      Array.isArray(req.body.contents) &&
+      req.body.contents[0] &&
+      req.body.contents[0].parts &&
+      Array.isArray(req.body.contents[0].parts) &&
+      req.body.contents[0].parts[0] &&
+      req.body.contents[0].parts[0].text
+    ) {
+      prompt = req.body.contents[0].parts[0].text;
+    } else {
+      res.status(400).json({ error: "No prompt found" });
+      return;
+    }
   } catch (e) {
     res.status(400).json({ error: "Invalid JSON" });
     return;
