@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1/models/gemma-3n-e2b-it:generateContent?key=${GEMINI_API_KEY}`;
   const body = {
     contents: [
       { parts: [{ text: prompt }] }
